@@ -6,12 +6,12 @@ const app = express();
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: "prasadjadhav1014@gmail.com",
+    pass: "omwgevfjabyhiydp",
   },
 });
 
@@ -28,7 +28,7 @@ app.post('/send-test-mail', async (req, res) => {
 
   try {
     const info = await transporter.sendMail({
-      from: process.env.MAIL_FROM,
+      from: "prasadjadhav1014@gmail.com",
       to,
       subject: req.body.subject || 'Test Mail',
       text: req.body.text || 'This is a test email sent via SMTP.',
