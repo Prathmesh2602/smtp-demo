@@ -1,24 +1,14 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const app = express();
 app.use(express.json());
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  family: 4,
-  connectionTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.get('/', (req, res) => {
-  res.send('SMTP demo server running. POST /send-test-mail to send a test email.');
+  res.send('Resend demo server running. POST /send-test-mail to send a test email.');
 });
 
 app.post('/send-test-mail', async (req, res) => {
@@ -29,14 +19,18 @@ app.post('/send-test-mail', async (req, res) => {
   }
 
   try {
-    const info = await transporter.sendMail({
+    const { data, error } = await resend.emails.send({
       from: process.env.MAIL_FROM,
       to,
       subject: req.body.subject || 'Test Mail',
-      text: req.body.text || 'This is a test email sent via SMTP.',
+      text: req.body.text || 'This is a test email sent via Resend.',
     });
 
-    res.json({ success: true, messageId: info.messageId });
+    if (error) {
+      return res.status(500).json({ error });
+    }
+
+    res.json({ success: true, id: data.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
